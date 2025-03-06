@@ -3,79 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face Segmentation App</title>
+    <title>Face Segmentation</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         body {
             background: linear-gradient(135deg, #667eea, #764ba2);
-            font-family: 'Poppins', sans-serif;
-            text-align: center;
             color: white;
-            padding: 20px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            padding: 50px;
         }
         .container {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            width: 50%;
-            margin: auto;
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
-        h2 {
-            margin-bottom: 20px;
-            font-size: 24px;
+        .custom-file-input {
+            margin: 20px 0;
         }
-        input[type="file"] {
-            padding: 10px;
-            background: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button {
-            background: #ff7eb3;
+        .btn-custom {
+            background-color: #ff6b6b;
             color: white;
+            padding: 10px 20px;
             border: none;
-            padding: 12px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
             transition: 0.3s;
         }
-        button:hover {
-            background: #ff4f7b;
+        .btn-custom:hover {
+            background-color: #ff4757;
         }
         img {
             max-width: 100%;
+            border: 3px solid white;
+            margin-top: 20px;
             border-radius: 10px;
-            margin-top: 15px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        p {
-            color: #ff4f7b;
-            font-size: 18px;
-            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Upload an Image for Face Segmentation</h2>
-        <form action="/" method="POST" enctype="multipart/form-data">
-            <input type="file" name="file" accept="image/*" required>
-            <button type="submit">Upload</button>
-        </form>
-
-        {% if error %}
-            <p>{{ error }}</p>
-        {% endif %}
-
-        {% if original and segmented %}
-            <h3>Original Image:</h3>
-            <img src="{{ original }}" alt="Uploaded Image">
-            <h3>Segmented Image:</h3>
-            <img src="{{ segmented }}" alt="Segmented Image">
-        {% endif %}
+        <h1 class="mb-4">Face Segmentation</h1>
+        <input type="file" class="form-control custom-file-input" id="fileInput" accept="image/*">
+        <button class="btn btn-custom mt-3" onclick="uploadImage()">Upload & Segment</button>
+        
+        <h2 class="mt-4">Segmented Output:</h2>
+        <img id="outputImage" alt="Segmented Image">
     </div>
+
+    <script>
+        function uploadImage() {
+            let fileInput = document.getElementById("fileInput");
+            let file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please select an image.");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("file", file);
+
+            fetch("/", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.segmented_image) {
+                    document.getElementById("outputImage").src = "data:image/png;base64," + data.segmented_image;
+                } else {
+                    alert("Error: " + (data.error || "Unknown error"));
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
 </body>
 </html>
